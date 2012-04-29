@@ -1,7 +1,7 @@
 (define (run port)
   (let ((socket (open-tcp-server-socket port)))
     (accept-loop socket)))
-    
+
 (define (accept-loop socket)
   (let* ((client (tcp-server-connection-accept socket #t #f))
 	(request (read-total-request client ""))
@@ -17,7 +17,6 @@
 	((not (file-exists? request-path)) (display "HTTP/1.0 404 WAAT?\n\nGO AWAY! (404)" client))
 	(else (write-response client request-path))))
 
-;; allow a default value for a response string
 (define (read-total-request client response)
     (let ((line (read-line client)))
       (if (string=? "" line)
@@ -29,11 +28,11 @@
 	 (space-index (substring-search-forward " " request-string slash-index (string-length request-string))))
     (substring request-string (+ slash-index 1) space-index)))
 
-(define (write-response c request-path)
-   (begin 
-     (display "HTTP/1.0 200 OK\n\n" c)
-     (send-file c request-path)))
-    
+(define (write-response client request-path)
+   (begin
+     (display "HTTP/1.0 200 OK\n\n" client)
+     (send-file client request-path)))
+
 (define (send-file client filename)
   (let ((file (open-input-file filename)))
     (let loop ((ch (read-char file)))
